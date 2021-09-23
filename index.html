@@ -1,85 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenCV Tratamiento de la imagen</title>
+   
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Meta tags rqueridos -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!--Bootstrap CSS-->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/custom.css">
-    <link>
-</head>
-<body>
-        <nav class="navbar navbar-dark fixed-top flex-md-nowrap p-0 shadow">
-            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">OpenCV Con JS</a>
-            <h1 class="col-md-10">Ejercicio 1 - Carga básica de imagen</h1>
-        </nav>
+    
+    <title>Ejemplos de openCV.</title>
+  </head>
+  <body>
 
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark fixed-top flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">OpenCV Visión Por Computadora.</a>
+        <h1 class="col-md-10">Ejemplo 2. Carga simple de webcam</h1>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                <div class="sidebar-sticky">
+                    <ul id="menu" class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Ejemplo 1. Carga Básica de Imagen</a></li> <!-- Hagan el enlace de su ejercicio anterior -->
+                        <li class="nav-item"><a class="nav-link" href="ejemplo2.html">Ejemplo 2. Carga Básica de WebCam</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-10 ml-sm-auto col-lg-10 px-4">
+                
             <div class="row">
-                <nav class="col-md-2 d-done d-md-block bg-lighet sidebar">
-                    <div class="sidebar-sticky">
-                        <ul id="menu" class="nav flex-column">
-                            <li></li>
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-
-            <main role="main" class="col-md-10 ml-sm-auto col-lg-10 px-40">
-                <div class="row">
-                   <div class="col">
-                       <div id="status" class="alert alert-primary" role="start">
-                           <img src="img/ajax-loader.gif" /> Cargando OpenCV...
-                       </div>
-                   </div> 
-                </div>
-                <div class="row">
                     <div class="col">
-                        <img id="imgSrc" alt="Sin imagen" class="small" src="img/gray.png">
-                    </div>
-                    <div class="col">
-                        <canvas id="canvasOutput" class="small" height="300px"></canvas>
+                        <div id="status" class="alert alert-primary" role="alert"><img src="img/ajax-loader.gif" /> Cargando OpenCV...</div>
                     </div>
                 </div>
-                <input type="file" id="fileInput" name="file" accept="image/*">
+                <a href="#" class="btn btn-primary" style="display: none;" id="cv_start">Aplicar</a>
+                <div class="row">
+                    <div class="col">
+                        <video id="videoInput" width="320" height="240"></video>
+                    </div>
+                    <div class="col">
+                        <canvas id="canvasOutput" class="small" height="300"></canvas>
+                    </div>
+                </div>
+                
             </main>
         </div>
-<!--Scripts para Bootstrap-->
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+    </div>
 
-<!--OpenCV-->
-<script async="" src="js/opencv.js" type="text/javascript" onload="onOpenCvReady();" onload="onOpenCvError();"></script>
-<script type="text/javascript">
-    let imgElement = document.getElementById('imgSrc');
-    let inputElement = document.getElementById('fileInput');
+    
+    <!-- jQuery Primero, Luego Popper.js, despues Bootstrap JS -->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <!-- OPENCV -->
+    <script async="" src="js/opencv.js" type="text/javascript" onload="onOpenCvReady();" onerror="onOpenCvError();"></script>
 
-    inputElement.addEventListener('change', (e) =>{
-        imgElement.src = URL.createObjectURL(e.target.files[0]);
-    }, false)
+    <script type="text/javascript">
 
-    imgElement.onload = function (){
-        let mat = CV.imread(imgElement);
-        cv.cvtColor(mat, mat, cv.Color_BGR2GRAY);
-        cv.imshow('canvasOutput', mat);
-        mat.delete();    
-    };
+        let video = document.getElementById("videoInput");
+        let src;
+        let dst;
+        let cap;
+        
+        const FPS = 30;
 
-    //funca
-    function onOpenCvReady(){
-        document.getElementById('status').innerHTML = '<b>OpenCV Cargó Correctamente';
-    }
-    //no funca
-    function onOpenCvError(){
-        let element = document.getElementById('status');
-        element.setAttribute('class', 'err');
-        element.innerHTML = "Falló la carga de OpenCV.js";
-    }
+        function processVideo(){
+            try{
+                let inicio = Date.now();
+                
+                cap.read(src);
+                cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
+                cv.imshow('canvasOutput', dst);
 
-</script>
-</body>
+                let delay = 1000/FPS - (Date.now() - inicio);
+                setTimeout(processVideo, delay);
+            }
+            catch (err){
+                console.log(err);
+            }
+        };
+
+        function start_cv(){
+            src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+            dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+            cap = new cv.VideoCapture(video);
+            processVideo();
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false})
+            .then(function(stream){
+                video.srcObject = stream; 
+                video.play();
+            })
+            .catch(function(err){
+                console.log("Ocurrio un error" + err);
+            });
+
+
+
+        function onOpenCvReady() { 
+            document.getElementById('status').innerHTML = '<b>OpenCV.js esta listo</b>.';
+            $("#cv_start").show();
+            $("#cv_start").click(start_cv);
+            
+        }
+        
+        function onOpenCvError() { 
+            let element = document.getElementById('status');
+            element.setAttribute('class', 'err');
+            element.innerHTML = 'falló al carga de opencv.js';
+        }
+
+        </script>
+  </body>
 </html>
